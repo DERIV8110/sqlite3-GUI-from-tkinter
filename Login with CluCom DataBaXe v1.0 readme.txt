@@ -1,0 +1,3 @@
+defined function/s in specific loop-->command function to execute should execute the loop
+in order to run the def function in the loop.
+Cannot run def function directly.
