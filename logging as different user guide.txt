@@ -1,0 +1,4 @@
+1.select_user = ttk.Button(root, text="select", command=lambda: clicked(user.get()))-->used to get value to open 
+  specific sql db.
+
+2.def clicked(value): --> will check the value and open db wrt value inside it.
