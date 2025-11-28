@@ -22,19 +22,20 @@ root.grid_columnconfigure(0, weight=1)
 root.grid_columnconfigure(1, weight=1)
 root.grid_columnconfigure(2, weight=1)
 
+conn= sqlite3.connect('patient.db')
+c=conn.cursor()
 
+c.execute("""CREATE TABLE IF NOT EXISTS patient(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL
+)""")
 
 def insert():
         conn= sqlite3.connect('patient.db')
         c=conn.cursor()
 
-        c.execute("""CREATE TABLE IF NOT EXISTS patients(
-                  id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL,
-            password TEXT NOT NULL
-        )""")
-
-        c.execute("INSERT INTO patients(username, password) VALUES (?,?)", (username.get(),password.get()))
+        c.execute("INSERT INTO patient(username, password) VALUES (?,?)", (username.get(),password.get()))
         username.delete(0,END)
         password.delete(0,END)
 
@@ -42,26 +43,30 @@ def insert():
         conn.close()
         
 def show():
-          conn= sqlite3.connect('patients.db')
+          conn= sqlite3.connect('patient.db')
           c= conn.cursor()
 
-          c.execute("""CREATE TABLE IF NOT EXISTS patients(
-            username TEXT,
-            password TEXT
-          )""")
-          c.execute("SELECT * FROM patients")
+          #c.execute("""CREATE TABLE IF NOT EXISTS patients(
+          #  username TEXT,
+          #  password TEXT
+          #)""")
+          c.execute("PRAGMA table_info(patient)")
+          columns_info = c.fetchall()
+          #col[1]--> selects all 2nd columns-->column names from entries table
+          col_names = [col[1] for col in columns_info]       
+          c.execute("SELECT * FROM patient")
           entries = c.fetchall()
 
-          tree= ttk.Treeview(root,columns=("ID","Username","Password"),show="headings")
-          tree.heading("Username", text="Username")
-          tree.heading("Password", text="Password")
-
+          tree = ttk.Treeview(root,columns=col_names,show="headings")
+          for colm in col_names:
+                 #for colm in col_names--> extracts all column names by help of [col[1] for col in columns_info] one by one
+                 tree.heading(colm, text=colm)
+                 #makes columns based on number of columns retreived using [col[1] for col in columns_info]-->headings
+                 tree.column(colm,width=60,anchor="center")
           for row in entries:
-            tree.insert("", tk.END, values=row)
-
-          tree.grid(column=0,row=3)
-
-
+                 #inserts rows from db to treeview ""-->(start) to tk.END--> values=rows of db one by one
+                 tree.insert("", tk.END, values=row)
+          tree.grid(row=3,columnspan=3,sticky="nsew")
           conn.commit()
           conn.close()
         
@@ -77,6 +82,9 @@ b6.grid(column=2,row=0,ipadx=9)
 
 b7 = ttk.Button(root,text="Show All",command=show)
 b7.grid(column=2,row=2)
+
+conn.commit()
+conn.close()
 
 root.geometry("720x480")
 root.mainloop()
